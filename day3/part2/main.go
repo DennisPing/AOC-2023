@@ -61,6 +61,8 @@ func main() {
 
 	for i := 1; i < len(grid)-1; i++ {
 		for j := 1; j < len(grid)-1; j++ {
+
+			// Find all numbers, check if it has a gear neighbor. If yes, save that gear's Point.
 			if IsDigit(grid[i][j]) {
 				num, size := GetNumber(grid[i][:], j)
 
@@ -92,6 +94,7 @@ func main() {
 	// }
 	// fmt.Printf("%v\n", gearList)
 
+	// Loop through the gear list. Find all numbers which have the same Point.
 	total := 0
 	for _, gear := range gearList {
 		nums := make([]int, 0)
@@ -119,13 +122,13 @@ func GetNumber(line []byte, i int) (int, int) {
 	return num, j - i
 }
 
+// Find the possible gear 'Point' in the upper, mid, and lower rows
 func FindGear(upper, mid, lower []byte, rOff, cOff int) (Point, bool) {
 	/*
 		.....* (upper)
 		.1234. (mid)
 		...... (lower)
 	*/
-
 	sizeOfNum := len(upper) - 2
 
 	for i, b := range upper {
