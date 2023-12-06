@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Section struct {
@@ -69,25 +70,82 @@ func main() {
 	CalculateMinLocation(seeds, sections)
 }
 
+// func CalculateMinLocation(seeds []int, sections []*Section) {
+// 	minLoc := math.MaxInt
+// 	locations := make([]int, 7) // Re-use this size 7 array
+
+// 	// Refactor with go-routines here
+// 	for _, seed := range seeds {
+// 		for i, section := range sections {
+// 			for _, line := range section.Data {
+// 				newLocation, found := MapLocation(seed, line)
+// 				if found {
+// 					seed = newLocation
+// 					break
+// 				}
+// 			}
+// 			locations[i] = seed
+// 		}
+// 		// fmt.Println(locations)
+// 		last := locations[len(locations)-1]
+// 		minLoc = Min(minLoc, last)
+// 	}
+// 	fmt.Println(minLoc)
+// }
+
+// Brute force with goroutines
 func CalculateMinLocation(seeds []int, sections []*Section) {
-	minLoc := math.MaxInt
-	locations := make([]int, 7) // Re-use this size 7 array
-	for _, seed := range seeds {
-		for i, section := range sections {
-			for _, line := range section.Data {
-				newLocation, found := MapLocation(seed, line)
-				if found {
-					seed = newLocation
-					break
-				}
-			}
-			locations[i] = seed
+	const numWorkers = 16
+	chunkSize := (len(seeds) + numWorkers - 1) / numWorkers
+
+	// Channels for worker results and controlling goroutines
+	results := make(chan int, numWorkers)
+	var wg sync.WaitGroup
+
+	for i := 0; i < numWorkers; i++ {
+		start := i * chunkSize
+		end := start + chunkSize
+		if end > len(seeds) {
+			end = len(seeds)
 		}
-		// fmt.Println(locations)
-		last := locations[len(locations)-1]
-		minLoc = Min(minLoc, last)
+
+		wg.Add(1)
+		go func(seedsChunk []int) {
+			defer wg.Done()
+			minLoc := math.MaxInt
+			locations := make([]int, 7) // Re-use this size 7 array
+
+			for _, seed := range seedsChunk {
+				for i, section := range sections {
+					for _, line := range section.Data {
+						newLocation, found := MapLocation(seed, line)
+						if found {
+							seed = newLocation
+							break
+						}
+					}
+					locations[i] = seed
+				}
+				last := locations[len(locations)-1]
+				minLoc = Min(minLoc, last)
+			}
+			results <- minLoc
+		}(seeds[start:end])
 	}
-	fmt.Println(minLoc)
+
+	// Wait for all goroutines to finish
+	go func() {
+		wg.Wait()
+		close(results)
+	}()
+
+	// Find the global minimum
+	globalMin := math.MaxInt
+	for min := range results {
+		globalMin = Min(globalMin, min)
+	}
+
+	fmt.Println(globalMin)
 }
 
 // Checks if mapping needs to be done, and if yes, returns the new mapped location
