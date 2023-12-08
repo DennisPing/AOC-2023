@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	content, err := os.ReadFile("test.txt")
+	content, err := os.ReadFile("input.txt")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -57,7 +57,6 @@ func main() {
 
 		// y = x(c-x) or x^2-cx+y = 0
 		x1, x2 := SolveQuadratic(1, -time, dist)
-		fmt.Println(x1, x2)
 
 		x1 = math.Floor(x1) // x1 is the higher one lol
 		x2 = math.Ceil(x2)  // x2 is the lower one
