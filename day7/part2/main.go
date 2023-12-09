@@ -26,11 +26,10 @@ var CardValues = map[byte]int{
 }
 
 type Hand struct {
-	Cards      string
-	Bid        int
-	Rank       int
-	Type       int
-	SortedHand []byte
+	Cards string
+	Bid   int
+	Rank  int
+	Type  int
 }
 
 func main() {
@@ -92,7 +91,7 @@ func classifyHand(hand *Hand) {
 func substituteClassify(cards string) int {
 	// Generate combinations by replacing J
 	strongestType := HighCard
-	for _, card := range cards {
+	for _, card := range cards { // Simple brute force
 		if card != 'J' {
 			newHand := strings.Replace(cards, "J", string(card), -1)
 			handType := simpleClassify(newHand)
