@@ -21,15 +21,16 @@ const (
 )
 
 var CardValues = map[byte]int{
-	'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
-	'T': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14,
+	'J': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+	'T': 10, 'Q': 11, 'K': 12, 'A': 13,
 }
 
 type Hand struct {
-	Cards string
-	Bid   int
-	Rank  int
-	Type  int
+	Cards      string
+	Bid        int
+	Rank       int
+	Type       int
+	SortedHand []byte
 }
 
 func main() {
@@ -63,16 +64,51 @@ func main() {
 		return compareHands(hands[j], hands[i])
 	})
 
+	for _, h := range hands {
+		fmt.Println(*h)
+	}
+
 	totalWinnings := calculateWinnings(hands)
 	fmt.Println(totalWinnings)
 }
 
 func classifyHand(hand *Hand) {
+	jokers := 0
+	for _, card := range hand.Cards {
+		if card == 'J' {
+			jokers++
+		}
+	}
+
+	if jokers == 5 { // Edge case
+		hand.Type = FiveKind
+	} else if jokers > 0 {
+		hand.Type = substituteClassify(hand.Cards)
+	} else {
+		hand.Type = simpleClassify(hand.Cards)
+	}
+}
+
+func substituteClassify(cards string) int {
+	// Generate combinations by replacing J
+	strongestType := HighCard
+	for _, card := range cards {
+		if card != 'J' {
+			newHand := strings.Replace(cards, "J", string(card), -1)
+			handType := simpleClassify(newHand)
+			if handType > strongestType {
+				strongestType = handType
+			}
+		}
+	}
+	return strongestType
+}
+func simpleClassify(cards string) int {
 	cardCount := make(map[rune]int)
 	var maxCount int
 
 	// Count letter/number frequency
-	for _, card := range hand.Cards {
+	for _, card := range cards {
 		cardCount[card]++
 		if cardCount[card] > maxCount {
 			maxCount = cardCount[card]
@@ -81,23 +117,23 @@ func classifyHand(hand *Hand) {
 
 	switch {
 	case len(cardCount) == 1:
-		hand.Type = FiveKind
+		return FiveKind
 	case len(cardCount) == 2:
 		if maxCount == 4 {
-			hand.Type = FourKind
+			return FourKind
 		} else {
-			hand.Type = FullHouse
+			return FullHouse
 		}
 	case len(cardCount) == 3:
 		if maxCount == 3 {
-			hand.Type = ThreeKind
+			return ThreeKind
 		} else {
-			hand.Type = TwoPair
+			return TwoPair
 		}
 	case len(cardCount) == 4:
-		hand.Type = OnePair
+		return OnePair
 	default:
-		hand.Type = HighCard
+		return HighCard
 	}
 }
 
