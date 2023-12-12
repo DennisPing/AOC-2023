@@ -15,7 +15,7 @@ import (
 type Coord [2]int
 
 func main() {
-	file, err := os.Open("test1.txt")
+	file, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -56,35 +56,43 @@ func main() {
 		char := string(grid[r][c])
 
 		// Check going up (north)
-		upchar := string(grid[r-1][c])
-		upcoord := [2]int{r - 1, c}
-		if r > 0 && strings.ContainsAny(char, "S|JL") && strings.ContainsAny(upchar, "|7F") && !found[upcoord] {
-			found[upcoord] = true
-			q.PushBack(upcoord)
+		if r > 0 {
+			upchar := string(grid[r-1][c])
+			upcoord := [2]int{r - 1, c}
+			if strings.ContainsAny(char, "S|JL") && strings.ContainsAny(upchar, "|7F") && !found[upcoord] {
+				found[upcoord] = true
+				q.PushBack(upcoord)
+			}
 		}
 
 		// Check going down (south)
-		downchar := string(grid[r+1][c])
-		downcoord := [2]int{r + 1, c}
-		if r < len(grid)-1 && strings.ContainsAny(char, "S|7F") && strings.ContainsAny(downchar, "|JL") && !found[downcoord] {
-			found[downcoord] = true
-			q.PushBack(downcoord)
+		if r < len(grid)-1 {
+			downchar := string(grid[r+1][c])
+			downcoord := [2]int{r + 1, c}
+			if strings.ContainsAny(char, "S|7F") && strings.ContainsAny(downchar, "|JL") && !found[downcoord] {
+				found[downcoord] = true
+				q.PushBack(downcoord)
+			}
 		}
 
 		// Check going left (west)
-		leftchar := string(grid[r][c-1])
-		leftcoord := [2]int{r, c - 1}
-		if c > 0 && strings.ContainsAny(char, "S-J7") && strings.ContainsAny(leftchar, "-LF") && !found[leftcoord] {
-			found[leftcoord] = true
-			q.PushBack(leftcoord)
+		if c > 0 {
+			leftchar := string(grid[r][c-1])
+			leftcoord := [2]int{r, c - 1}
+			if strings.ContainsAny(char, "S-J7") && strings.ContainsAny(leftchar, "-LF") && !found[leftcoord] {
+				found[leftcoord] = true
+				q.PushBack(leftcoord)
+			}
 		}
 
 		// Check going right (east)
-		rightchar := string(grid[r][c+1])
-		rightcoord := [2]int{r, c + 1}
-		if c < len(grid)-1 && strings.ContainsAny(char, "S-LF") && strings.ContainsAny(rightchar, "-J7") && !found[rightcoord] {
-			found[rightcoord] = true
-			q.PushBack(rightcoord)
+		if c < len(grid[0])-1 {
+			rightchar := string(grid[r][c+1])
+			rightcoord := [2]int{r, c + 1}
+			if strings.ContainsAny(char, "S-LF") && strings.ContainsAny(rightchar, "-J7") && !found[rightcoord] {
+				found[rightcoord] = true
+				q.PushBack(rightcoord)
+			}
 		}
 	}
 
