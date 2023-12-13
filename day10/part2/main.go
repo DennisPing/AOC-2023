@@ -10,7 +10,7 @@ import (
 	"github.com/gammazero/deque"
 )
 
-// This is BFS
+// This is BFS with ray casting algorithm
 
 type Coord [2]int
 
@@ -42,7 +42,7 @@ func main() {
 
 		for i, c := range line {
 			if c == 'S' {
-				curr = [2]int{r, i}
+				curr = Coord{r, i}
 			}
 		}
 
@@ -80,6 +80,36 @@ func main() {
 		}
 	}
 
-	n := len(visited)
-	fmt.Println(n / 2)
+	// Count the number of points inside the polygon
+	ans := 0
+	for i := range grid {
+		for j := range grid[i] {
+			if !visited[Coord{i, j}] {
+				numXs := rayCast(Coord{i, j}, grid, visited)
+				// Odd number means inside polygon
+				if numXs%2 != 0 {
+					ans++
+				}
+			}
+		}
+	}
+	fmt.Println(ans)
+
+}
+
+// Point is inside the polygon if number of intersections is odd
+// Point is outside the polygon if number of intersections is even
+func rayCast(coord Coord, grid []string, visited map[Coord]bool) int {
+	r := coord[0]
+	c := coord[1]
+	line := grid[r]
+	count := 0
+
+	// Look horizontal from 0 to col
+	for j, sym := range line[:c] {
+		if visited[Coord{r, j}] && strings.ContainsAny(string(sym), "|JL") {
+			count++
+		}
+	}
+	return count
 }

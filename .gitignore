@@ -21,4 +21,4 @@
 go.work
 
 # Text input files
-*.txt
+*input.txt
